@@ -39,6 +39,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.0"
+    }
+
 }
 
 dependencies {
@@ -72,4 +77,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
+    // Navigation Compose
+    implementation("androidx.navigation:navigation-compose:2.7.0")
 }
