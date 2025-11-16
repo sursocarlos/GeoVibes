@@ -76,6 +76,16 @@ Ejecuta la app en un emulador o dispositivo.
 
 ---
 
+## Credenciales de prueba
+
+| Email            | Contraseña |
+|-----------------|------------|
+| admin@admin.com | admin123   |
+
+> Nota: Puedes registrar más usuarios desde la app.
+
+---
+
 ## Notas
 - Se ha usado **Firebase Authentication** para gestionar usuarios.
 - La Base de datos de Firebase no es necesaria para esta práctica; solo se autentican usuarios.
