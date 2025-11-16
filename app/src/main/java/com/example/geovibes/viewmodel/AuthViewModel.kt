@@ -19,10 +19,13 @@ class AuthViewModel : ViewModel() {
                             when {
                                 exception.message?.contains("badly formatted", true) == true ->
                                     "El correo electrónico no tiene un formato válido."
+
                                 exception.message?.contains("password", true) == true ->
                                     "La contraseña debe tener al menos 6 caracteres"
+
                                 exception.message?.contains("already in use", true) == true ->
                                     "Este correo ya está registrado."
+
                                 else -> "Ha ocurrido un error interno."
                             }
                         } ?: "Ha ocurrido un error interno."
@@ -44,10 +47,13 @@ class AuthViewModel : ViewModel() {
                             when {
                                 exception.message?.contains("badly formatted", true) == true ->
                                     "El correo electrónico no tiene un formato válido."
+
                                 exception.message?.contains("password", true) == true ->
                                     "Contraseña incorrecta."
+
                                 exception.message?.contains("no user record", true) == true ->
                                     "No existe una cuenta con ese correo."
+
                                 else -> "No existe una cuenta con ese correo."
                             }
                         } ?: "Ha ocurrido un error interno."

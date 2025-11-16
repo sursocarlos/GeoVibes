@@ -36,16 +36,25 @@ fun RegisterScreen(navController: NavHostController) {
         Spacer(Modifier.height(20.dp))
         OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation())
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation()
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
             } else {
                 authViewModel.registerUser(email, password) { success, message ->
-                    if (success) navController.navigate("map") { popUpTo("register") { inclusive = true } }
-                    else Toast.makeText(context, message ?: "Error desconocido", Toast.LENGTH_SHORT).show()
+                    if (success) navController.navigate("map") {
+                        popUpTo("register") {
+                            inclusive = true
+                        }
+                    }
+                    else Toast.makeText(context, message ?: "Error desconocido", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }) { Text("Registrarse") }
