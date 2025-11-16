@@ -8,54 +8,97 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+
+
 
 @Composable
-fun RegisterScreen(navController: NavHostController, viewModel: AuthViewModel = viewModel()) {
+fun RegisterScreen(navController: NavHostController) {
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    val auth = FirebaseAuth.getInstance()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Registro", style = MaterialTheme.typography.headlineSmall)
-            Spacer(Modifier.height(20.dp))
+    fun isValidEmail(input: String): Boolean {
+        val emailRegex = Regex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        return emailRegex.matches(input)
+    }
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Correo") }
-            )
-            Spacer(Modifier.height(10.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Contraseña") },
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Spacer(Modifier.height(20.dp))
+        Text("Crear cuenta", fontSize = 26.sp)
 
-            Button(onClick = {
-                viewModel.registerUser(email, password) { success, error ->
-                    if (success) navController.navigate("map")
-                    else errorMessage = error
+        Spacer(Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Correo") }
+        )
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        Button(onClick = {
+            // VALIDACIONES
+            when {
+                email.isBlank() || password.isBlank() -> {
+                    errorMsg = "Rellena todos los campos."
+                    return@Button
                 }
-            }) {
-                Text("Crear cuenta")
+
+                !isValidEmail(email) -> {
+                    errorMsg = "Correo no válido."
+                    return@Button
+                }
+
+                password.length < 6 -> {
+                    errorMsg = "La contraseña debe tener mínimo 6 caracteres."
+                    return@Button
+                }
             }
 
+            // REGISTRO
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+                    navController.navigate("map") {
+                        popUpTo("register") { inclusive = true }
+                    }
+                }
+                .addOnFailureListener {
+                    errorMsg = "Error: ${it.message}"
+                }
+
+        }) {
+            Text("Registrar")
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        TextButton(onClick = { navController.navigate("login") }) {
+            Text("Ya tengo cuenta")
+        }
+
+        errorMsg?.let {
             Spacer(Modifier.height(10.dp))
-
-            TextButton(onClick = { navController.navigate("login") }) {
-                Text("¿Ya tienes cuenta? Inicia sesión")
-            }
-
-            errorMessage?.let {
-                Spacer(Modifier.height(10.dp))
-                Text(it, color = MaterialTheme.colorScheme.error)
-            }
+            Text(it, color = Color.Red)
         }
     }
 }
+
 
