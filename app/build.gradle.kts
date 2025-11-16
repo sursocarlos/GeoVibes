@@ -79,4 +79,5 @@ dependencies {
 
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.0")
+
 }

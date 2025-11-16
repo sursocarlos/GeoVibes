@@ -9,6 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geovibes.ui.theme.GeoVibesTheme
+import com.google.firebase.auth.FirebaseAuth
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,9 +26,23 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GeoVibesApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login") {
-        composable("login") { LoginScreen(navController) }
-        composable("register") { RegisterScreen(navController) }
-        composable("map") { MapScreen() }
+    val auth = FirebaseAuth.getInstance()
+
+    val startDestination = if (auth.currentUser != null) {
+        "map"
+    } else {
+        "login"
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable("login") {
+            LoginScreen(navController)
+        }
+        composable("register") {
+            RegisterScreen(navController)
+        }
+        composable("map") {
+            MapScreen(navController)
+        }
     }
 }
