@@ -9,3 +9,4 @@ class MyApplication : Application() {
         FirebaseApp.initializeApp(this)
     }
 }
+

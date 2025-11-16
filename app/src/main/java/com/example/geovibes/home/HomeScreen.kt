@@ -1,4 +1,4 @@
-package com.example.geovibes
+package com.example.geovibes.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -11,8 +11,7 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun MapScreen(navController: NavHostController) {
-
+fun HomeScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
 
     Column(
@@ -20,16 +19,11 @@ fun MapScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        Text("MAP SCREEN — Aquí pondremos el mapa")
-
+        Text("HOME SCREEN — Aquí pondré el mapa")
         Spacer(modifier = Modifier.height(20.dp))
-
         Button(onClick = {
             auth.signOut()
-            navController.navigate("login") {
-                popUpTo("map") { inclusive = true }
-            }
+            navController.navigate("login") { popUpTo("map") { inclusive = true } }
         }) {
             Text("Cerrar sesión")
         }
