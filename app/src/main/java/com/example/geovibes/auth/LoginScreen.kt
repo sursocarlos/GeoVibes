@@ -13,6 +13,11 @@ import androidx.navigation.NavHostController
 import com.example.geovibes.viewmodel.AuthViewModel
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
+
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
@@ -21,6 +26,9 @@ fun LoginScreen(navController: NavHostController) {
     val authViewModel = AuthViewModel()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    // 1. Añadimos esta variable para controlar si se ve o no
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -33,13 +41,28 @@ fun LoginScreen(navController: NavHostController) {
         Text("Iniciar sesión", fontSize = 26.sp)
 
         Spacer(Modifier.height(20.dp))
-        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        OutlinedTextField(value = email, modifier = Modifier.fillMaxWidth(), onValueChange = { email = it }, label = { Text("Email") })
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation()
+            modifier = Modifier.fillMaxWidth(),
+            // Aquí cambiamos la transformación según la variable
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            // Aquí añadimos el icono del ojito
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+
+                // Descripción para accesibilidad
+                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = description)
+                }
+            }
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
@@ -56,7 +79,9 @@ fun LoginScreen(navController: NavHostController) {
                         .show()
                 }
             }
-        }) { Text("Iniciar sesión") }
+        },
+            modifier = Modifier.fillMaxWidth(),
+            ) { Text("Iniciar sesión") }
 
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(onClick = { navController.navigate("register") }) {
