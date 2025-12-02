@@ -1,6 +1,6 @@
 package com.example.geovibes.auth
 
-import android.annotation.SuppressLint
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -15,23 +15,30 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.geovibes.viewmodel.AuthViewModel
 
-@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun RegisterScreen(navController: NavHostController) {
     val context = LocalContext.current
-    val authViewModel = AuthViewModel()
+    val authViewModel: AuthViewModel = viewModel()
 
-    // Variables para los campos de texto
+    // Variables de texto
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") } // Nuevo campo
+    var confirmPassword by remember { mutableStateOf("") }
 
-    // Variables para controlar la visibilidad (ojitos)
+    // Variables de visibilidad (ojitos)
     var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) } // Nuevo ojito
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+
+    // Variables de error visual (Rojo)
+    var emailError by remember { mutableStateOf(false) }
+    var passwordError by remember { mutableStateOf(false) }
+    var confirmPasswordError by remember { mutableStateOf(false) }
+
+    val isLoading = authViewModel.isLoading
 
     Column(
         modifier = Modifier
@@ -45,85 +52,120 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(Modifier.height(20.dp))
 
-        // Campo Email
+        // --- CAMPO EMAIL ---
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = false
+            },
             label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = emailError,
+            supportingText = {
+                if (emailError) {
+                    // Lógica inteligente: Si está vacío -> "Campo obligatorio", si no -> "Formato inválido"
+                    Text(if (email.isEmpty()) "Campo obligatorio" else "Formato de correo inválido")
+                }
+            }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo Contraseña Original
+        // --- CAMPO CONTRASEÑA ---
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                passwordError = false
+            },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = passwordError,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(imageVector = image, contentDescription = description)
+                }
+            },
+            supportingText = {
+                if (passwordError) {
+                    // Lógica inteligente: Si está vacío -> "Campo obligatorio", si no -> "Mínimo 6 caracteres"
+                    Text(if (password.isEmpty()) "Campo obligatorio" else "Mínimo 6 caracteres")
                 }
             }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Nuevo Campo: Confirmar Contraseña
+        // --- CAMPO CONFIRMAR CONTRASEÑA ---
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = {
+                confirmPassword = it
+                confirmPasswordError = false
+            },
             label = { Text("Confirmar contraseña") },
             modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = confirmPasswordError,
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                 val description = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
-
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(imageVector = image, contentDescription = description)
+                }
+            },
+            supportingText = {
+                if (confirmPasswordError) {
+                    Text(if (confirmPassword.isEmpty()) "Campo obligatorio" else "Las contraseñas no coinciden")
                 }
             }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botón con la nueva lógica de validación
-        Button(
-            onClick = {
-                if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                    Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
-                } else if (password != confirmPassword) {
-                    // Aquí validamos que sean iguales
-                    Toast.makeText(context, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Si todo está bien, procedemos al registro
-                    authViewModel.registerUser(email, password) { success, message ->
-                        if (success) {
-                            navController.navigate("map") {
-                                popUpTo("register") { inclusive = true }
-                            }
-                        } else {
-                            Toast.makeText(context, message ?: "Error desconocido", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            },
-
-            modifier = Modifier.fillMaxWidth()
-
-        ) {
-            Text("Registrarse")
-        }
-
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextButton(onClick = { navController.navigate("login") }) {
+        // --- BOTÓN / CARGA ---
+        if (isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = {
+                    // 1. Email
+                    emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher (email).matches()
+
+                    // 2. Password (Error si vacía o corta)
+                    passwordError = password.isEmpty() || password.length < 6
+
+                    // 3. Confirmar Password (LÓGICA MEJORADA)
+                    // Solo marcamos error si está vacía...
+                    // O SI (la primera NO está vacía Y son diferentes)
+                    confirmPasswordError = confirmPassword.isEmpty() || (password.isNotEmpty() && password != confirmPassword)
+
+                    // Solo enviamos si no hay errores
+                    if (!emailError && !passwordError && !confirmPasswordError) {
+                        authViewModel.registerUser(email, password) { success, message ->
+                            if (success) {
+                                navController.navigate("map") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                            } else {
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Registrarse")
+            }
+        }
+
+        TextButton(
+            onClick = { navController.navigate("login") },
+            enabled = !isLoading
+        ) {
             Text("¿Ya tienes cuenta?")
         }
     }
