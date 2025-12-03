@@ -82,10 +82,14 @@ fun LoginScreen(navController: NavHostController) {
             value = email,
             onValueChange = { email = it; emailError = false },
             label = "Email",
-            icon = Icons.Default.Email, // Icono de email
+            icon = Icons.Default.Email,
             isError = emailError,
             errorMessage = if (email.isEmpty()) "Campo obligatorio" else "Formato inválido",
-            enabled = !isLoading
+            enabled = !isLoading,
+            // CORRECCIÓN 1: Teclado específico para Email (aparece la @)
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +159,11 @@ fun LoginScreen(navController: NavHostController) {
                 color = TravelBlue,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(enabled = !isLoading) {
-                    navController.navigate("register")
+                    // CORRECCIÓN 2: Navegación limpia
+                    navController.navigate("register") {
+                        // Al ir al registro, quitamos el Login de la pila para no acumular
+                        popUpTo("login") { inclusive = true }
+                    }
                 }
             )
         }

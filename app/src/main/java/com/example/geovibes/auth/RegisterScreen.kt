@@ -33,6 +33,7 @@ import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -90,8 +91,6 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 2. FORMULARIO
-
         // --- EMAIL ---
         GeoVibesTextField(
             value = email,
@@ -100,7 +99,11 @@ fun RegisterScreen(navController: NavHostController) {
             icon = Icons.Default.Email,
             isError = emailError,
             errorMessage = if (email.isEmpty()) "Campo obligatorio" else "Formato inválido",
-            enabled = !isLoading
+            enabled = !isLoading,
+            // CORRECCIÓN 1: Teclado de Email
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -196,7 +199,11 @@ fun RegisterScreen(navController: NavHostController) {
                 color = TravelBlue,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(enabled = !isLoading) {
-                    navController.navigate("login")
+                    // CORRECCIÓN 2: Navegación limpia
+                    navController.navigate("login") {
+                        // Volvemos al login limpiando el registro de la pila
+                        popUpTo("register") { inclusive = true }
+                    }
                 }
             )
         }
