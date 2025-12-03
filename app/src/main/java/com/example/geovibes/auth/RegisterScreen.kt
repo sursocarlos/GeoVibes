@@ -2,22 +2,36 @@ package com.example.geovibes.auth
 
 import android.util.Patterns
 import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.geovibes.R
+import com.example.geovibes.components.GeoVibesTextField
+import com.example.geovibes.ui.theme.TextGray
+import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -29,144 +43,155 @@ fun RegisterScreen(navController: NavHostController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // Variables de visibilidad (ojitos)
+    // Variables de visibilidad
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    // Variables de error visual (Rojo)
+    // Variables de error visual
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
 
     val isLoading = authViewModel.isLoading
 
+    // Añadimos scroll por si en pantallas pequeñas el teclado tapa el botón
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(24.dp)
+            .verticalScroll(scrollState), // Scroll habilitado
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
 
-        Text("Registrarse", fontSize = 26.sp)
-
-        Spacer(Modifier.height(20.dp))
-
-        // --- CAMPO EMAIL ---
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-                emailError = false
-            },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            isError = emailError,
-            supportingText = {
-                if (emailError) {
-                    // Lógica inteligente: Si está vacío -> "Campo obligatorio", si no -> "Formato inválido"
-                    Text(if (email.isEmpty()) "Campo obligatorio" else "Formato de correo inválido")
-                }
-            }
+        // 1. CABECERA
+        Image(
+            painter = painterResource(id = R.drawable.ic_brujula),
+            contentDescription = "Logo GeoVibes",
+            modifier = Modifier.size(80.dp) // Un pelín más pequeño que en login para dejar espacio
         )
 
-        // --- CAMPO CONTRASEÑA ---
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Crea tu cuenta",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = TravelBlue
+        )
+        Text(
+            text = "Únete a la comunidad de exploradores",
+            fontSize = 16.sp,
+            color = TextGray
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 2. FORMULARIO
+
+        // --- EMAIL ---
+        GeoVibesTextField(
+            value = email,
+            onValueChange = { email = it; emailError = false },
+            label = "Email",
+            icon = Icons.Default.Email,
+            isError = emailError,
+            errorMessage = if (email.isEmpty()) "Campo obligatorio" else "Formato inválido",
+            enabled = !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- CONTRASEÑA ---
+        GeoVibesTextField(
             value = password,
-            onValueChange = {
-                password = it
-                passwordError = false
-            },
-            label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            isError = passwordError,
+            onValueChange = { password = it; passwordError = false },
+            label = "Contraseña",
+            icon = Icons.Default.Lock,
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = description)
+                    Icon(imageVector = image, contentDescription = null, tint = TextGray)
                 }
             },
-            supportingText = {
-                if (passwordError) {
-                    // Lógica inteligente: Si está vacío -> "Campo obligatorio", si no -> "Mínimo 6 caracteres"
-                    Text(if (password.isEmpty()) "Campo obligatorio" else "Mínimo 6 caracteres")
-                }
-            }
+            isError = passwordError,
+            errorMessage = if (password.isEmpty()) "Campo obligatorio" else "Mínimo 6 caracteres",
+            enabled = !isLoading
         )
 
-        // --- CAMPO CONFIRMAR CONTRASEÑA ---
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- CONFIRMAR CONTRASEÑA ---
+        GeoVibesTextField(
             value = confirmPassword,
-            onValueChange = {
-                confirmPassword = it
-                confirmPasswordError = false
-            },
-            label = { Text("Confirmar contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            isError = confirmPasswordError,
+            onValueChange = { confirmPassword = it; confirmPasswordError = false },
+            label = "Confirmar contraseña",
+            icon = Icons.Default.Lock,
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                val description = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                    Icon(imageVector = image, contentDescription = description)
+                    Icon(imageVector = image, contentDescription = null, tint = TextGray)
                 }
             },
-            supportingText = {
-                if (confirmPasswordError) {
-                    Text(if (confirmPassword.isEmpty()) "Campo obligatorio" else "Las contraseñas no coinciden")
-                }
-            }
+            isError = confirmPasswordError,
+            errorMessage = if (confirmPassword.isEmpty()) "Campo obligatorio" else "Las contraseñas no coinciden",
+            enabled = !isLoading
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // --- BOTÓN / CARGA ---
+        // 3. BOTÓN DE ACCIÓN
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(color = TravelBlue)
         } else {
             Button(
                 onClick = {
-                    // 1. Email
-                    emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher (email).matches()
-
-                    // 2. Password (Error si vacía o corta)
+                    // Lógica de validación (la misma que ya teníamos)
+                    emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()
                     passwordError = password.isEmpty() || password.length < 6
 
-                    // 3. Confirmar Password (LÓGICA MEJORADA)
-                    // Solo marcamos error si está vacía...
-                    // O SI (la primera NO está vacía Y son diferentes)
+                    // Error si está vacío O si (habiendo escrito la primera) son diferentes
                     confirmPasswordError = confirmPassword.isEmpty() || (password.isNotEmpty() && password != confirmPassword)
 
-                    // Solo enviamos si no hay errores
                     if (!emailError && !passwordError && !confirmPasswordError) {
                         authViewModel.registerUser(email, password) { success, message ->
                             if (success) {
-                                navController.navigate("map") {
-                                    popUpTo("register") { inclusive = true }
-                                }
+                                navController.navigate("map") { popUpTo("register") { inclusive = true } }
                             } else {
                                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = TravelBlue)
             ) {
-                Text("Registrarse")
+                Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
 
-        TextButton(
-            onClick = { navController.navigate("login") },
-            enabled = !isLoading
-        ) {
-            Text("¿Ya tienes cuenta?")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 4. FOOTER
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("¿Ya tienes cuenta?", color = TextGray)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Inicia sesión",
+                color = TravelBlue,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable(enabled = !isLoading) {
+                    navController.navigate("login")
+                }
+            )
         }
     }
 }

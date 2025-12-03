@@ -2,21 +2,35 @@ package com.example.geovibes.auth
 
 import android.util.Patterns
 import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.geovibes.R
+import com.example.geovibes.components.GeoVibesTextField // Importa tu nuevo componente
+import com.example.geovibes.ui.theme.TextGray
+import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
 
 @Composable
@@ -24,14 +38,9 @@ fun LoginScreen(navController: NavHostController) {
     val context = LocalContext.current
     val authViewModel: AuthViewModel = viewModel()
 
-    // Variables de texto
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
-    // Variable de visibilidad (ojito)
     var passwordVisible by remember { mutableStateOf(false) }
-
-    // Variables de error visual (Rojo)
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
 
@@ -41,96 +50,106 @@ fun LoginScreen(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center // Todo centrado verticalmente
     ) {
-
-        Text("Iniciar sesión", fontSize = 26.sp)
-
-        Spacer(Modifier.height(20.dp))
-
-        // --- CAMPO EMAIL ---
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-                emailError = false // Limpiamos error al escribir
-            },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            isError = emailError,
-            supportingText = {
-                if (emailError) {
-                    // Lógica inteligente: Vacío -> "Campo obligatorio", Texto mal -> "Formato inválido"
-                    Text(if (email.isEmpty()) "Campo obligatorio" else "Formato de correo inválido")
-                }
-            }
+        // 1. CABECERA: Logo e Intro
+        // Asegúrate de que R.drawable.ic_brujula existe (lo vi en tus archivos)
+        Image(
+            painter = painterResource(id = R.drawable.ic_brujula),
+            contentDescription = "Logo GeoVibes",
+            modifier = Modifier.size(100.dp)
         )
 
-        // --- CAMPO CONTRASEÑA ---
-        OutlinedTextField(
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Bienvenido a GeoVibes",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = TravelBlue
+        )
+        Text(
+            text = "Inicia sesión para continuar explorando",
+            fontSize = 16.sp,
+            color = TextGray
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // 2. FORMULARIO (Usando nuestro componente personalizado)
+        GeoVibesTextField(
+            value = email,
+            onValueChange = { email = it; emailError = false },
+            label = "Email",
+            icon = Icons.Default.Email, // Icono de email
+            isError = emailError,
+            errorMessage = if (email.isEmpty()) "Campo obligatorio" else "Formato inválido",
+            enabled = !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        GeoVibesTextField(
             value = password,
-            onValueChange = {
-                password = it
-                passwordError = false // Limpiamos error al escribir
-            },
-            label = { Text("Contraseña") },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            isError = passwordError,
+            onValueChange = { password = it; passwordError = false },
+            label = "Contraseña",
+            icon = Icons.Default.Lock, // Icono de candado
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = description)
+                    Icon(imageVector = image, contentDescription = null, tint = TextGray)
                 }
             },
-            supportingText = {
-                if (passwordError) {
-                    Text("Campo obligatorio")
-                }
-            }
+            isError = passwordError,
+            errorMessage = "Campo obligatorio",
+            enabled = !isLoading
         )
 
-        // Nota: Al usar supportingText, el Spacer intermedio ya no es necesario o puede ser pequeño
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // --- BOTÓN / CARGA ---
+        // 3. BOTÓN DE ACCIÓN (Estilo "Pill" con sombra)
         if (isLoading) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(color = TravelBlue)
         } else {
             Button(
                 onClick = {
-                    // 1. Validaciones Visuales Locales
-                    // Email: Error si vacío O formato incorrecto
                     emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-                    // Password: Error si vacío
                     passwordError = password.isEmpty()
 
-                    // 2. Si no hay errores visuales, llamamos al ViewModel
                     if (!emailError && !passwordError) {
                         authViewModel.loginUser(email, password) { success, message ->
-                            if (success) navController.navigate("map") {
-                                popUpTo("login") { inclusive = true }
-                            }
+                            if (success) navController.navigate("map") { popUpTo("login") { inclusive = true } }
                             else Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp) // Botón más alto y pulsable
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)), // Sombra suave
+                shape = RoundedCornerShape(25.dp), // Totalmente redondo (Pill)
+                colors = ButtonDefaults.buttonColors(containerColor = TravelBlue)
             ) {
-                Text("Iniciar sesión")
+                Text("Iniciar Sesión", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
 
-        TextButton(
-            onClick = { navController.navigate("register") },
-            enabled = !isLoading
-        ) {
-            Text("¿No tienes cuenta?")
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 4. FOOTER
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("¿Nuevo aquí?", color = TextGray)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Crea una cuenta",
+                color = TravelBlue,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable(enabled = !isLoading) {
+                    navController.navigate("register")
+                }
+            )
         }
     }
 }
