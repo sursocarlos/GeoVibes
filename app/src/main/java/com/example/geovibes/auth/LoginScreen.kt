@@ -109,7 +109,7 @@ fun LoginScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 3. BOTÓN DE ACCIÓN (Estilo "Pill" con sombra)
+        // 3. BOTÓN DE ACCIÓN
         if (isLoading) {
             CircularProgressIndicator(color = TravelBlue)
         } else {
@@ -127,12 +127,20 @@ fun LoginScreen(navController: NavHostController) {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp) // Botón más alto y pulsable
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)), // Sombra suave
-                shape = RoundedCornerShape(25.dp), // Totalmente redondo (Pill)
-                colors = ButtonDefaults.buttonColors(containerColor = TravelBlue)
+                    .height(50.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TravelBlue,
+                    contentColor = Color.White // <--- 1. FUERZA EL COLOR AQUÍ
+                )
             ) {
-                Text("Iniciar Sesión", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Iniciar Sesión",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White // <--- 2. Y FUÉRZALO AQUÍ TAMBIÉN (DOBLE SEGURIDAD)
+                )
             }
         }
 

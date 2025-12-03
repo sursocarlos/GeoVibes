@@ -11,6 +11,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.geovibes.ui.theme.InputGray
+import com.example.geovibes.ui.theme.TextBlack
+import com.example.geovibes.ui.theme.TextGray
 import com.example.geovibes.ui.theme.TravelBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,15 +21,14 @@ fun GeoVibesTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    icon: ImageVector? = null, // Icono opcional al principio
-    trailingIcon: @Composable (() -> Unit)? = null, // Icono al final (ojito)
+    icon: ImageVector? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     isError: Boolean = false,
     errorMessage: String? = null,
     enabled: Boolean = true
 ) {
-    // Input moderno: Sin bordes duros, fondo suave y esquinas redondas
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -39,14 +40,31 @@ fun GeoVibesTextField(
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         singleLine = true,
-        shape = RoundedCornerShape(16.dp), // ¡Esquinas muy redondeadas!
+        shape = RoundedCornerShape(16.dp),
+
+        // AQUÍ ESTÁ EL CAMBIO IMPORTANTE
         colors = OutlinedTextFieldDefaults.colors(
+            // 1. Bordes y Fondos (Ya lo teníamos)
             focusedBorderColor = TravelBlue,
-            unfocusedBorderColor = Color.Transparent, // Sin borde cuando no escribes
+            unfocusedBorderColor = Color.Transparent,
             errorBorderColor = MaterialTheme.colorScheme.error,
-            focusedContainerColor = InputGray, // Fondo gris suave
+            focusedContainerColor = InputGray,
             unfocusedContainerColor = InputGray,
-            errorContainerColor = InputGray
+            errorContainerColor = InputGray,
+
+            // 2. TEXTOS Y ETIQUETAS (Esto arregla el Samsung)
+            // Cuando escribes:
+            focusedLabelColor = TravelBlue,
+            focusedTextColor = TextBlack,
+
+            // Cuando NO escribes (el problema actual):
+            // Antes estaba en automático, ahora forzamos Gris Oscuro
+            unfocusedLabelColor = TextGray,
+            unfocusedTextColor = TextBlack,
+
+            // Otros detalles
+            cursorColor = TravelBlue,
+            errorLabelColor = MaterialTheme.colorScheme.error
         ),
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,

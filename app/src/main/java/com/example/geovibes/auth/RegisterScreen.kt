@@ -32,6 +32,7 @@ import com.example.geovibes.ui.theme.TextGray
 import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -150,11 +151,9 @@ fun RegisterScreen(navController: NavHostController) {
         } else {
             Button(
                 onClick = {
-                    // Lógica de validación (la misma que ya teníamos)
+                    // ... (tu lógica de validación igual que antes) ...
                     emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()
                     passwordError = password.isEmpty() || password.length < 6
-
-                    // Error si está vacío O si (habiendo escrito la primera) son diferentes
                     confirmPasswordError = confirmPassword.isEmpty() || (password.isNotEmpty() && password != confirmPassword)
 
                     if (!emailError && !passwordError && !confirmPasswordError) {
@@ -172,9 +171,17 @@ fun RegisterScreen(navController: NavHostController) {
                     .height(50.dp)
                     .shadow(elevation = 4.dp, shape = RoundedCornerShape(25.dp)),
                 shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = TravelBlue)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TravelBlue,
+                    contentColor = Color.White // <--- ARREGLO AQUÍ
+                )
             ) {
-                Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = "Registrarse",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White // <--- ARREGLO AQUÍ
+                )
             }
         }
 
