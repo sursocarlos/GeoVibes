@@ -6,23 +6,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geovibes.model.User
 import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    // Instancia de la Base de Datos
+    private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     var isLoading by mutableStateOf(false)
         private set
 
     fun registerUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        // Validaciones locales
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             onResult(false, "El formato del correo no es correcto")
             return
@@ -36,10 +38,31 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    isLoading = false
                     if (task.isSuccessful) {
-                        onResult(true, null)
+                        // Al registrarse, guardamos al usuario en la Base de Datos con rol "usuario"
+                        val userId = auth.currentUser?.uid
+                        if (userId != null) {
+                            val newUser = User(
+                                email = email,
+                                rol = "usuario" // Por defecto, todos son usuarios normales
+                                // nombre y telefono los dejamos vacíos por ahora
+                            )
+                            // Guardamos en el nodo "users" bajo su ID
+                            db.getReference("users").child(userId).setValue(newUser)
+                                .addOnCompleteListener { dbTask ->
+                                    isLoading = false
+                                    if (dbTask.isSuccessful) {
+                                        onResult(true, null)
+                                    } else {
+                                        onResult(true, null)
+                                    }
+                                }
+                        } else {
+                            isLoading = false
+                            onResult(true, null)
+                        }
                     } else {
+                        isLoading = false
                         val errorMessage = when (task.exception) {
                             is FirebaseAuthUserCollisionException -> "Este correo ya está registrado."
                             is FirebaseAuthWeakPasswordException -> "La contraseña es muy débil."
@@ -53,7 +76,6 @@ class AuthViewModel : ViewModel() {
     }
 
     fun loginUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        // Validaciones locales
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             onResult(false, "El formato del correo no es correcto")
             return
@@ -72,15 +94,10 @@ class AuthViewModel : ViewModel() {
                         onResult(true, null)
                     } else {
                         val exception = task.exception
-
-                        // AQUÍ ESTÁ EL CAMBIO DE SEGURIDAD:
                         val errorMessage = when (exception) {
-                            // Unificamos las dos excepciones en una sola respuesta
                             is FirebaseAuthInvalidUserException,
                             is FirebaseAuthInvalidCredentialsException -> "Correo o contraseña incorrectos."
-
                             is FirebaseNetworkException -> "Sin conexión a internet. Comprueba tu red."
-                            is FirebaseTooManyRequestsException -> "Demasiados intentos fallidos. Por favor, espera un momento."
                             else -> "Error al iniciar sesión: ${exception?.localizedMessage}"
                         }
                         onResult(false, errorMessage)
