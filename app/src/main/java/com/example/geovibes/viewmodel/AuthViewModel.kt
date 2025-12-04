@@ -18,12 +18,20 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    // Instancia de la Base de Datos
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     var isLoading by mutableStateOf(false)
         private set
 
-    fun registerUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
+    // CAMBIO IMPORTANTE: Ahora la función acepta 'nombre: String'
+    fun registerUser(email: String, password: String, nombre: String, onResult: (Boolean, String?) -> Unit) {
+
+        // Validaciones locales (incluyendo nombre)
+        if (nombre.isEmpty()) {
+            onResult(false, "El nombre es obligatorio")
+            return
+        }
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             onResult(false, "El formato del correo no es correcto")
             return
@@ -40,18 +48,17 @@ class AuthViewModel : ViewModel() {
                     if (task.isSuccessful) {
                         val userId = auth.currentUser?.uid
                         if (userId != null) {
-                            val newUser = User(email = email, rol = "usuario")
-
-                            // Guardamos en DB
+                            // Creamos el usuario con el NOMBRE que nos llega
+                            val newUser = User(
+                                nombre = nombre, // <--- AQUÍ SE GUARDA
+                                email = email,
+                                rol = "usuario"
+                            )
+                            // Guardamos en Realtime Database
                             db.getReference("users").child(userId).setValue(newUser)
-                                .addOnCompleteListener {
-                                    // Si termina (bien o mal), quitamos la carga y entramos
+                                .addOnCompleteListener { dbTask ->
                                     isLoading = false
-                                    onResult(true, null)
-                                }
-                                .addOnFailureListener {
-                                    // Si falla estrepitosamente, también entramos para no bloquear
-                                    isLoading = false
+                                    // Éxito total (Auth + DB)
                                     onResult(true, null)
                                 }
                         } else {

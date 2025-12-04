@@ -24,6 +24,7 @@ import com.example.geovibes.ui.theme.TravelBlue
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase // Necesario para leer el nombre
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -34,12 +35,29 @@ fun HomeScreen(navController: NavHostController) {
     val auth = FirebaseAuth.getInstance()
     val currentUser = auth.currentUser
 
-    // Ubicación: Mairena del Aljarafe
+    // Estado para guardar el nombre del usuario
+    var userName by remember { mutableStateOf("Cargando...") }
+
+    // EFECTO: Leer el nombre de la base de datos al cargar la pantalla
+    LaunchedEffect(Unit) {
+        val uid = currentUser?.uid
+        if (uid != null) {
+            FirebaseDatabase.getInstance().getReference("users").child(uid).child("nombre").get()
+                .addOnSuccessListener { snapshot ->
+                    // Si existe el nombre, lo ponemos. Si no, usamos el email o "Usuario"
+                    userName = snapshot.value as? String ?: currentUser.email ?: "Usuario"
+                }
+                .addOnFailureListener {
+                    userName = currentUser.email ?: "Usuario"
+                }
+        }
+    }
+
+    // Configuración del mapa (Mairena)
     val mairena = LatLng(37.345, -6.065)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(mairena, 14f)
     }
-
     val mapProperties by remember { mutableStateOf(MapProperties(isMyLocationEnabled = false)) }
     val mapUiSettings by remember {
         mutableStateOf(MapUiSettings(zoomControlsEnabled = false, compassEnabled = false, myLocationButtonEnabled = false))
@@ -55,7 +73,7 @@ fun HomeScreen(navController: NavHostController) {
             uiSettings = mapUiSettings
         )
 
-        // 2. BARRA SUPERIOR (PERFIL)
+        // 2. BARRA SUPERIOR (PERFIL CON NOMBRE)
         Surface(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -79,10 +97,12 @@ fun HomeScreen(navController: NavHostController) {
                         Icon(Icons.Default.Person, contentDescription = "Perfil", tint = TravelBlue, modifier = Modifier.size(24.dp))
                     }
                     Spacer(modifier = Modifier.width(12.dp))
+
                     Column {
                         Text("Hola, explorador", fontSize = 12.sp, color = Color.Gray)
+                        // AQUÍ MOSTRAMOS EL NOMBRE REAL
                         Text(
-                            text = currentUser?.email ?: "Usuario",
+                            text = userName,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack,
@@ -100,7 +120,7 @@ fun HomeScreen(navController: NavHostController) {
             }
         }
 
-        // 3. NUEVO BOTÓN: VER AVISOS (Abajo en el centro)
+        // 3. BOTÓN VER AVISOS
         ExtendedFloatingActionButton(
             onClick = { navController.navigate("elementList") },
             modifier = Modifier

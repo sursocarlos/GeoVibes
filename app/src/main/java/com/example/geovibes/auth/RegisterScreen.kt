@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person // Icono para el nombre
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -18,6 +19,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,9 +34,6 @@ import com.example.geovibes.components.GeoVibesTextField
 import com.example.geovibes.ui.theme.TextGray
 import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -41,6 +41,7 @@ fun RegisterScreen(navController: NavHostController) {
     val authViewModel: AuthViewModel = viewModel()
 
     // Variables de texto
+    var nombre by remember { mutableStateOf("") } // NUEVO CAMPO
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -50,20 +51,19 @@ fun RegisterScreen(navController: NavHostController) {
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     // Variables de error visual
+    var nombreError by remember { mutableStateOf(false) } // ERROR NUEVO
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
 
     val isLoading = authViewModel.isLoading
-
-    // Añadimos scroll por si en pantallas pequeñas el teclado tapa el botón
     val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .verticalScroll(scrollState), // Scroll habilitado
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -72,7 +72,7 @@ fun RegisterScreen(navController: NavHostController) {
         Image(
             painter = painterResource(id = R.drawable.ic_brujula),
             contentDescription = "Logo GeoVibes",
-            modifier = Modifier.size(80.dp) // Un pelín más pequeño que en login para dejar espacio
+            modifier = Modifier.size(80.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,6 +91,21 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // 2. FORMULARIO
+
+        // --- NUEVO: CAMPO NOMBRE ---
+        GeoVibesTextField(
+            value = nombre,
+            onValueChange = { nombre = it; nombreError = false },
+            label = "Nombre de usuario",
+            icon = Icons.Default.Person,
+            isError = nombreError,
+            errorMessage = "El nombre es obligatorio",
+            enabled = !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // --- EMAIL ---
         GeoVibesTextField(
             value = email,
@@ -99,11 +114,7 @@ fun RegisterScreen(navController: NavHostController) {
             icon = Icons.Default.Email,
             isError = emailError,
             errorMessage = if (email.isEmpty()) "Campo obligatorio" else "Formato inválido",
-            enabled = !isLoading,
-            // CORRECCIÓN 1: Teclado de Email
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            )
+            enabled = !isLoading
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -154,13 +165,15 @@ fun RegisterScreen(navController: NavHostController) {
         } else {
             Button(
                 onClick = {
-                    // ... (tu lógica de validación igual que antes) ...
+                    // Validaciones
+                    nombreError = nombre.isEmpty()
                     emailError = email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()
                     passwordError = password.isEmpty() || password.length < 6
                     confirmPasswordError = confirmPassword.isEmpty() || (password.isNotEmpty() && password != confirmPassword)
 
-                    if (!emailError && !passwordError && !confirmPasswordError) {
-                        authViewModel.registerUser(email, password) { success, message ->
+                    if (!nombreError && !emailError && !passwordError && !confirmPasswordError) {
+                        // Llamamos al nuevo registro pasando el NOMBRE
+                        authViewModel.registerUser(email, password, nombre) { success, message ->
                             if (success) {
                                 navController.navigate("map") { popUpTo("register") { inclusive = true } }
                             } else {
@@ -176,21 +189,15 @@ fun RegisterScreen(navController: NavHostController) {
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = TravelBlue,
-                    contentColor = Color.White // <--- ARREGLO AQUÍ
+                    contentColor = Color.White
                 )
             ) {
-                Text(
-                    text = "Registrarse",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White // <--- ARREGLO AQUÍ
-                )
+                Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 4. FOOTER
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("¿Ya tienes cuenta?", color = TextGray)
             Spacer(modifier = Modifier.width(4.dp))
@@ -199,11 +206,7 @@ fun RegisterScreen(navController: NavHostController) {
                 color = TravelBlue,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(enabled = !isLoading) {
-                    // CORRECCIÓN 2: Navegación limpia
-                    navController.navigate("login") {
-                        // Volvemos al login limpiando el registro de la pila
-                        popUpTo("register") { inclusive = true }
-                    }
+                    navController.navigate("login")
                 }
             )
         }

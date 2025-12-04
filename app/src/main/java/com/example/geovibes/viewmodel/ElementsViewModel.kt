@@ -1,7 +1,5 @@
 package com.example.geovibes.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -12,7 +10,9 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ElementsViewModel : ViewModel() {
     private val db = FirebaseDatabase.getInstance()
@@ -40,7 +40,7 @@ class ElementsViewModel : ViewModel() {
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val rol = snapshot.getValue(String::class.java)
-                // Si el valor es "admin", activamos los superpoderes
+                // Si el valor es "admin", activamos los permisos
                 isAdmin = (rol == "admin")
             }
             override fun onCancelled(error: DatabaseError) {}
@@ -75,8 +75,9 @@ class ElementsViewModel : ViewModel() {
         if (elemento.id.isEmpty()) {
             // CREAR: Si no tiene ID, es nuevo. Usamos push() para generar ID
             val newRef = ref.push()
-            // Añadimos la fecha de hoy automáticamente (Requisito PDF)
-            val fechaHoy = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault()).format(java.util.Date())
+
+            // Fecha automática compatible con todos los Android
+            val fechaHoy = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
             val newElement = elemento.copy(fechaCreacion = fechaHoy)
 
             newRef.setValue(newElement).addOnCompleteListener { onResult(it.isSuccessful) }
@@ -94,4 +95,3 @@ class ElementsViewModel : ViewModel() {
         }
     }
 }
-
