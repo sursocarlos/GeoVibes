@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    // Instancia de la Base de Datos
     private val db: FirebaseDatabase = FirebaseDatabase.getInstance()
 
     var isLoading by mutableStateOf(false)
@@ -39,23 +38,21 @@ class AuthViewModel : ViewModel() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Al registrarse, guardamos al usuario en la Base de Datos con rol "usuario"
                         val userId = auth.currentUser?.uid
                         if (userId != null) {
-                            val newUser = User(
-                                email = email,
-                                rol = "usuario" // Por defecto, todos son usuarios normales
-                                // nombre y telefono los dejamos vacíos por ahora
-                            )
-                            // Guardamos en el nodo "users" bajo su ID
+                            val newUser = User(email = email, rol = "usuario")
+
+                            // Guardamos en DB
                             db.getReference("users").child(userId).setValue(newUser)
-                                .addOnCompleteListener { dbTask ->
+                                .addOnCompleteListener {
+                                    // Si termina (bien o mal), quitamos la carga y entramos
                                     isLoading = false
-                                    if (dbTask.isSuccessful) {
-                                        onResult(true, null)
-                                    } else {
-                                        onResult(true, null)
-                                    }
+                                    onResult(true, null)
+                                }
+                                .addOnFailureListener {
+                                    // Si falla estrepitosamente, también entramos para no bloquear
+                                    isLoading = false
+                                    onResult(true, null)
                                 }
                         } else {
                             isLoading = false
