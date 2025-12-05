@@ -26,19 +26,19 @@ import com.example.geovibes.viewmodel.ElementsViewModel
 @Composable
 fun ElementFormScreen(
     navController: NavController,
-    elementId: String? = null, // Si es null = Crear nuevo. Si tiene texto = Editar.
+    elementId: String? = null,
     viewModel: ElementsViewModel = viewModel()
 ) {
-    // Si estamos editando, buscamos el elemento en la lista del ViewModel
+
     val elementoExistente = remember {
         if (elementId != null) viewModel.elementos.find { it.id == elementId } else null
     }
 
-    // Estados del formulario (si editamos, rellenamos con lo que había)
+
     var nombre by remember { mutableStateOf(elementoExistente?.nombre ?: "") }
     var descripcion by remember { mutableStateOf(elementoExistente?.descripcion ?: "") }
 
-    // Control de errores visuales
+
     var nombreError by remember { mutableStateOf(false) }
     var descError by remember { mutableStateOf(false) }
 
@@ -68,7 +68,7 @@ fun ElementFormScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // CAMPO NOMBRE
+
             GeoVibesTextField(
                 value = nombre,
                 onValueChange = {
@@ -83,7 +83,7 @@ fun ElementFormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // CAMPO DESCRIPCIÓN
+
             GeoVibesTextField(
                 value = descripcion,
                 onValueChange = {
@@ -98,27 +98,25 @@ fun ElementFormScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // BOTÓN GUARDAR
+
             Button(
                 onClick = {
-                    // Validaciones simples
+
                     nombreError = nombre.isEmpty()
                     descError = descripcion.isEmpty()
 
                     if (!nombreError && !descError) {
-                        // Creamos el objeto (si es nuevo, el ID lo pone vacío)
+
                         val nuevoElemento = Elemento(
                             id = elementId ?: "",
                             nombre = nombre,
                             descripcion = descripcion,
-                            // Si editamos, mantenemos la fecha original. Si es nuevo, el ViewModel pone la de hoy.
                             fechaCreacion = elementoExistente?.fechaCreacion ?: ""
                         )
 
-                        // Llamamos al cerebro para guardar
                         viewModel.saveElement(nuevoElemento) { success ->
                             if (success) {
-                                navController.popBackStack() // Volvemos a la lista
+                                navController.popBackStack()
                             }
                         }
                     }

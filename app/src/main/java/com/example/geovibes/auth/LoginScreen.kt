@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.geovibes.R
-import com.example.geovibes.components.GeoVibesTextField // Importa tu nuevo componente
+import com.example.geovibes.components.GeoVibesTextField
 import com.example.geovibes.ui.theme.TextGray
 import com.example.geovibes.ui.theme.TravelBlue
 import com.example.geovibes.viewmodel.AuthViewModel
@@ -54,7 +54,6 @@ fun LoginScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Center // Todo centrado verticalmente
     ) {
         // 1. CABECERA: Logo e Intro
-        // Asegúrate de que R.drawable.ic_brujula existe (lo vi en tus archivos)
         Image(
             painter = painterResource(id = R.drawable.ic_brujula),
             contentDescription = "Logo GeoVibes",
@@ -136,14 +135,14 @@ fun LoginScreen(navController: NavHostController) {
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = TravelBlue,
-                    contentColor = Color.White // <--- 1. FUERZA EL COLOR AQUÍ
+                    contentColor = Color.White
                 )
             ) {
                 Text(
                     text = "Iniciar Sesión",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White // <--- 2. Y FUÉRZALO AQUÍ TAMBIÉN (DOBLE SEGURIDAD)
+                    color = Color.White
                 )
             }
         }
@@ -159,9 +158,7 @@ fun LoginScreen(navController: NavHostController) {
                 color = TravelBlue,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable(enabled = !isLoading) {
-                    // CORRECCIÓN 2: Navegación limpia
                     navController.navigate("register") {
-                        // Al ir al registro, quitamos el Login de la pila para no acumular
                         popUpTo("login") { inclusive = true }
                     }
                 }

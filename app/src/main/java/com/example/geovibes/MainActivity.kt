@@ -7,7 +7,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.example.geovibes.navigation.AppNavigation
 import com.example.geovibes.ui.theme.GeoVibesTheme
-import androidx.compose.runtime.* // Importante para el estado
+import androidx.compose.runtime.*
 import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
@@ -30,8 +30,8 @@ class MainActivity : ComponentActivity() {
                 // Simulamos una mini carga o esperamos a que Compose pinte
                 // Esto es un truco visual para evitar el parpadeo blanco
                 LaunchedEffect(Unit) {
-                    delay(500) // Esperamos medio segundo (puedes ajustar esto)
-                    isAppReady = true // ¡Ya puedes quitar la splash!
+                    delay(500)
+                    isAppReady = true
                 }
 
                 GeoVibesApp()

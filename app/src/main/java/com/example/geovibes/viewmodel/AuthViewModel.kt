@@ -24,7 +24,6 @@ class AuthViewModel : ViewModel() {
     var isLoading by mutableStateOf(false)
         private set
 
-    // CAMBIO IMPORTANTE: Ahora la función acepta 'nombre: String'
     fun registerUser(email: String, password: String, nombre: String, onResult: (Boolean, String?) -> Unit) {
 
         // Validaciones locales (incluyendo nombre)
@@ -50,7 +49,7 @@ class AuthViewModel : ViewModel() {
                         if (userId != null) {
                             // Creamos el usuario con el NOMBRE que nos llega
                             val newUser = User(
-                                nombre = nombre, // <--- AQUÍ SE GUARDA
+                                nombre = nombre,
                                 email = email,
                                 rol = "usuario"
                             )
@@ -58,7 +57,6 @@ class AuthViewModel : ViewModel() {
                             db.getReference("users").child(userId).setValue(newUser)
                                 .addOnCompleteListener { dbTask ->
                                     isLoading = false
-                                    // Éxito total (Auth + DB)
                                     onResult(true, null)
                                 }
                         } else {

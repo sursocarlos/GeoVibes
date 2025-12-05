@@ -18,7 +18,6 @@ class ElementsViewModel : ViewModel() {
     private val db = FirebaseDatabase.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    // Estado: La lista de elementos que mostramos en pantalla
     var elementos by mutableStateOf<List<Elemento>>(emptyList())
         private set
 

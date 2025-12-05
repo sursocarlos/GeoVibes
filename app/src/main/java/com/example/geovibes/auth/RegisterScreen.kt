@@ -92,8 +92,6 @@ fun RegisterScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(24.dp))
 
         // 2. FORMULARIO
-
-        // --- NUEVO: CAMPO NOMBRE ---
         GeoVibesTextField(
             value = nombre,
             onValueChange = { nombre = it; nombreError = false },

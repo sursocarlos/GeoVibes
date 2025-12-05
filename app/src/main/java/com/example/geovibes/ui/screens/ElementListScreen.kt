@@ -28,7 +28,7 @@ import com.example.geovibes.viewmodel.ElementsViewModel
 @Composable
 fun ElementListScreen(
     navController: NavController,
-    // Usamos el mismo ViewModel para compartir datos
+
     viewModel: ElementsViewModel = viewModel()
 ) {
     val elementos = viewModel.elementos
@@ -50,7 +50,7 @@ fun ElementListScreen(
             )
         },
         floatingActionButton = {
-            // SEGURIDAD VISUAL: Solo mostramos el botón (+) si es Admin
+            // Solo mostramos el botón (+) si es Admin
             if (isAdmin) {
                 FloatingActionButton(
                     onClick = { navController.navigate("elementForm") }, // Navega al formulario vacío
@@ -62,7 +62,7 @@ fun ElementListScreen(
             }
         }
     ) { padding ->
-        // Si la lista está vacía, mostramos un mensaje bonito
+        // Si la lista está vacía, mostramos un mensaje
         if (elementos.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize().padding(padding),
@@ -120,7 +120,7 @@ fun ElementListScreen(
                                 color = Color.DarkGray
                             )
 
-                            // SEGURIDAD VISUAL: Botones de Acción (Solo Admin)
+                            // Botones de Acción (Solo Admin)
                             if (isAdmin) {
                                 HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
                                 Row(

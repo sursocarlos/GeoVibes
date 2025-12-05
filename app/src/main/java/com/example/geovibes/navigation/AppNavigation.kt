@@ -15,17 +15,14 @@ import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
-    // Si el usuario ya está logueado, vamos directo al mapa. Si no, al login.
     val startDestination = if (FirebaseAuth.getInstance().currentUser != null) "map" else "login"
 
     NavHost(navController = navController, startDestination = startDestination) {
 
-        // --- RUTAS CLÁSICAS ---
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("map") { HomeScreen(navController) }
 
-        // --- NUEVAS RUTAS (GESTIÓN DE AVISOS) ---
 
         // 1. Pantalla de Lista
         composable("elementList") {
@@ -33,7 +30,6 @@ fun AppNavigation(navController: NavHostController) {
         }
 
         // 2. Pantalla de Formulario (Crear/Editar)
-        // Acepta un parámetro opcional "?id={id}"
         composable(
             route = "elementForm?id={id}",
             arguments = listOf(navArgument("id") {
@@ -42,7 +38,6 @@ fun AppNavigation(navController: NavHostController) {
                 defaultValue = null
             })
         ) { backStackEntry ->
-            // Recuperamos el ID (si existe) y se lo pasamos a la pantalla
             val id = backStackEntry.arguments?.getString("id")
             ElementFormScreen(navController, elementId = id)
         }

@@ -24,7 +24,7 @@ import com.example.geovibes.ui.theme.TravelBlue
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase // Necesario para leer el nombre
+import com.google.firebase.database.FirebaseDatabase
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings

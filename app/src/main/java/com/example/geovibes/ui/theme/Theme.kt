@@ -15,7 +15,7 @@ private val DarkColorScheme = darkColorScheme(
     primary = TravelBlue,
     secondary = OceanCyan,
     tertiary = Pink80,
-    error = ErrorRed // Rojo fuerte en modo oscuro
+    error = ErrorRed
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -24,7 +24,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40,
     background = White,
     surface = White,
-    error = ErrorRed, // Rojo fuerte en modo claro
+    error = ErrorRed,
     onPrimary = White,
     onSecondary = White,
     onTertiary = White,
@@ -36,7 +36,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun GeoVibesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // IMPORTANTE: Ponemos esto a FALSE para que Samsung no cambie tus colores
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
