@@ -1,93 +1,94 @@
-# GeoVibes App
+# 🌍 GeoVibes App
 
-GeoVibes es un proyecto que tiene como propósito compartir lugares de interés en un mapa interactivo, facilitando a los usuarios encontrar miradores y sitios especiales que no aparecen en guías tradicionales. Está dirigida a viajeros, excursionistas y curiosos que disfrutan explorando.
+GeoVibes es una aplicación Android moderna desarrollada con **Kotlin** y **Jetpack Compose** que combina la geolocalización con un tablón de avisos gestionado por roles.
 
-Cuenta con **login**, **registro** y **pantalla principal (Home)** que muestra el email del usuario autenticado y permite cerrar sesión.
-
----
-
-## Contenido del proyecto
-
-- `app/` → código de la app (pantallas, navegación, ViewModel, Firebase, etc.)
-- `build.gradle` y `settings.gradle` → configuración del proyecto
-- `README.md` → este archivo
-- **Nota:** El archivo `google-services.json` no está incluido en el repositorio por seguridad.  
-  Para que funcione la app, se debe añadir localmente en `app/`.
+El proyecto permite a los usuarios explorar un mapa interactivo y consultar avisos locales. Incluye autenticación con Firebase, diferenciando entre usuarios normales y administradores, permitiendo a estos últimos realizar operaciones **CRUD** completas.
 
 ---
 
-## Requisitos
+## 📱 Funcionalidades Principales
 
-- Android Studio Bumblebee o superior
-- Emulador o dispositivo Android con mínimo SDK 24
-- Conexión a internet para Firebase
-- Firebase configurado con Authentication (Email/Password)
+### 1. Autenticación y Seguridad 🔐
+- **Splash Screen** con logo y transición fluida.
+- **Login y Registro** con validaciones en tiempo real:
+  - Formato de email.
+  - Longitud mínima de contraseña.
+  - Confirmación de contraseña.
+  - Nombre de usuario personalizado.
+- Manejo de errores (red, credenciales incorrectas, intentos fallidos).
+- **Persistencia de sesión** entre reinicios.
 
----
+### 2. Mapa Interactivo (Home) 🗺️
+- Integración con **Google Maps SDK** (Maps Compose).
+- **Barra superior flotante** con avatar y nombre real del usuario.
+- Ubicación inicial centrada en **Mairena del Aljarafe (Sevilla)**.
+- Navegación directa al tablón de avisos y cierre de sesión.
 
-## Instrucciones para ejecutar
+### 3. Gestión de Avisos (Roles y Permisos) 📋
+Sistema basado en Firebase Realtime Database:
 
-1. Clona el proyecto desde GitHub:
+#### 👤 Usuario Normal
+- Puede ver la lista de avisos en tiempo real.
+- Sin permisos de edición o creación.
 
-bash
-git clone https://github.com/sursocarlos/GeoVibes
-
-Abre el proyecto en Android Studio.
-
-Coloca tu archivo `google-services.json` dentro de `app/` (este archivo no se sube al repositorio).
-
-Haz **Build → Clean Project** y luego **Build → Rebuild Project**.
-
-Ejecuta la app en un emulador o dispositivo.
-
----
-
-## Pantallas y funcionamiento
-
-### 1. Login
-- Muestra un formulario con Email y Contraseña.
-- Valida que los campos no estén vacíos.
-- Mensajes de error en español si:
-    - El email está mal formateado.
-    - La contraseña es incorrecta.
-- Al iniciar sesión correctamente, redirige a **Home**.
-
-### 2. Registro
-- Formulario con Email y Contraseña.
-- Valida:
-    - Campos no vacíos.
-    - Contraseña mínima de 6 caracteres.
-- Permite crear usuarios en Firebase Authentication.
-- Redirige automáticamente a **Home** al registrarse correctamente.
-- En caso de error (correo ya usado, formato inválido, etc.) muestra un mensaje en español.
-
-### 3. Home
-- Muestra el email del usuario autenticado en la parte superior de la pantalla.
-- Botón **Cerrar sesión** que vuelve a la pantalla de login.
-- La sesión se mantiene incluso al cerrar y abrir la app.
+#### 🛡️ Administrador
+- **Crear** avisos (título, descripción, fecha automática).
+- **Editar** avisos existentes.
+- **Eliminar** avisos con confirmación (Toast).
+- Acceso a botones flotantes y herramientas administrativas.
 
 ---
 
-## Demostración de funcionamiento
-- Login vacío → muestra mensajes de error.
-- Registro con formulario visible → permite crear usuario.
-- Home → muestra el email del usuario y botón de cerrar sesión.
-- Al cerrar sesión, vuelve a la pantalla de login.
+## 🚀 Instrucciones de Instalación y Configuración
 
----
+Sigue estos pasos para ejecutar el proyecto en tu entorno local.
 
-## Credenciales de prueba
+### 1. Clonar el repositorio
 
-| Email            | Contraseña |
-|-----------------|------------|
-| admin@admin.com | admin123   |
+git clone [https://github.com/sursocarlos/GeoVibes.git](https://github.com/sursocarlos/GeoVibes.git)
 
-> Nota: Puedes registrar más usuarios desde la app.
 
----
+## 2. Configurar Firebase
+Descarga el archivo `google-services.json` desde tu consola de Firebase.
+Colócalo en la siguiente ruta dentro del proyecto:
 
-## Notas
-- Se ha usado **Firebase Authentication** para gestionar usuarios.
-- La Base de datos de Firebase no es necesaria para esta práctica; solo se autentican usuarios.
-- La app está desarrollada con **Jetpack Compose** y navegación por **NavController**.
-- No se incluye el archivo `google-services.json` en el repositorio por seguridad.
+    app/google-services.json
+
+## 3. Configurar Google Maps (local.properties)
+Para que los mapas funcionen y para mantener segura la API Key, el proyecto lee la clave desde el archivo `local.properties`.
+Abre o crea el archivo `local.properties` en la raíz del proyecto.
+Añade tu clave de API de la siguiente manera:
+
+    ## This file must *NOT* be checked into Version Control Systems,
+    # as it contains information specific to your local configuration.
+    sdk.dir=C:\Users\TU_USUARIO\AppData\Local\Android\Sdk
+    # --- API KEY DE GOOGLE MAPS ---
+    MAPS_API_KEY=AIzaSyTuClaveDeGoogleMapsAqui...
+
+## 4. Compilar y Ejecutar
+1. Abre el proyecto en Android Studio (versión Ladybug o superior recomendada).
+2. Sincroniza el proyecto con Gradle (Sync Project with Gradle Files).
+3. Ve a:
+  - Build → Clean Project
+  - Build → Rebuild Project
+4. Ejecuta la app en un emulador o dispositivo físico.
+
+## 🔐 Credenciales de Prueba
+Puedes usar estas credenciales para probar los diferentes roles:
+
+| Rol | Email | Contraseña | Permisos |
+| :--- | :--- | :--- | :--- |
+| Administrador | admin@admin.com | admin123 | Crear, Leer, Actualizar, Borrar |
+| Usuario | user@test.com | 123456 | Solo Leer |
+
+Nota: Los nuevos usuarios registrados desde la app tienen rol de usuario por defecto. Para ascender a un usuario a administrador, edita manualmente su campo role a admin en Firebase Realtime Database → users.
+
+## 📸 Estructura del Proyecto
+
+    /
+    ├── viewmodel/       # Lógica de negocio (AuthViewModel, ElementsViewModel)
+    ├── ui/
+    │   ├── screens/     # Pantallas (Login, Register, Home, ElementList, ElementForm)
+    │   └── theme/       # Tema y colores (TravelBlue)
+    ├── model/           # Clases de datos (User, Elemento)
+    └── components/      # Componentes UI reutilizables (GeoVibesTextField)
